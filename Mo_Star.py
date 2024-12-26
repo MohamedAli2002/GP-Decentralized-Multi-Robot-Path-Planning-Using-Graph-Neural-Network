@@ -59,7 +59,7 @@ class MoStar:
         for key in keys_to_remove:
             del self.et[key]
             
-    def check_confilicts(self,paths):
+    def check_conflicts(self,paths):
         if None in paths:
             return 0
         num_of_confilicts = 0
