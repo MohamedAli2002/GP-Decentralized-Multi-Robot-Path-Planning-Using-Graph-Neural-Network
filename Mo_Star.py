@@ -2,6 +2,7 @@ import heapq
 from collections import deque
 import copy
 import numpy as np
+
 class MoStar:
     def __init__(self, grid, start_positions, goal_positions):
         self.grid = grid  # 2D list representing the grid map (0: free, 1: obstacle)
@@ -18,7 +19,8 @@ class MoStar:
     
     def heuristic(self, pos, goal):
         """Manhattan distance heuristic."""
-        return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
+        # return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
+        return ((pos[0] - goal[0]) ** 2 + (pos[1] - goal[1]) ** 2) ** 0.5
     
     def a_star(self, agent_id):
         """A* search for a single agent, considering dependencies."""
@@ -45,8 +47,8 @@ class MoStar:
                     if (current[0],current[1],nx,ny,len(new_path)-0.5) not in self.et and (nx,ny,current[0],current[1],len(new_path)-0.5) not in self.et:
                         new_cost = cost + 1 + self.heuristic((nx, ny), goal)
                         heapq.heappush(pq, (new_cost, (nx, ny), new_path))
-                        if (nx, ny) == goal:
-                            return new_path + [(nx, ny)]
+                        # if (nx, ny) == goal:
+                        #     return new_path + [(nx, ny)]
         return None  # No path found
     
     def remove_from_t_grid(self,agent):
@@ -130,6 +132,7 @@ class MoStar:
                     self.et[(path[i][0],path[i][1],path[i+1][0],path[i+1][1],i+0.5)] = agent
             paths.append(path)
         n_conflicts = self.check_conflicts(paths)
+        print(paths)
         if None in paths:
             return [None]
         n_paths = [row[:] for row in paths]
