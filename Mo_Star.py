@@ -64,8 +64,8 @@ class MoStar:
             return 0
         num_of_confilicts = 0
         list_of_confilicts = []
-        max_len = max(paths)
-        for step in range(len(max_len)):
+        max_len = max(len(path) for path in paths)
+        for step in range(max_len):
             step_nodes = {}
             for path in paths:
                 if step < len(path):
@@ -129,7 +129,7 @@ class MoStar:
                 for i in range(size-1):
                     self.et[(path[i][0],path[i][1],path[i+1][0],path[i+1][1],i+0.5)] = agent
             paths.append(path)
-        n_conflicts = self.check_confilicts(paths)
+        n_conflicts = self.check_conflicts(paths)
         if None in paths:
             return [None]
         n_paths = [row[:] for row in paths]
@@ -140,7 +140,7 @@ class MoStar:
                 con = 100
                 idx = 0
                 for i in range(len(x)):
-                    v = self.check_confilicts(x[i])
+                    v = self.check_conflicts(x[i])
                     if v == 0:
                         return x[i]
                     if v < con:
