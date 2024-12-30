@@ -132,7 +132,6 @@ class MoStar:
                     self.et[(path[i][0],path[i][1],path[i+1][0],path[i+1][1],i+0.5)] = agent
             paths.append(path)
         n_conflicts = self.check_conflicts(paths)
-        print(paths)
         if None in paths:
             return [None]
         n_paths = [row[:] for row in paths]
