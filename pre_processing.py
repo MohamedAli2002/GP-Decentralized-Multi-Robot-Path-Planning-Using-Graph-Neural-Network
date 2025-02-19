@@ -104,18 +104,25 @@ class Preprocessing:
             # print((i,j))
             channels.append(np.pad(channel, pad_width=1, mode='constant', constant_values=0))
         return channels
+    def get_max_length(self,paths):
+        max_length = 0
+        for path in paths:
+            if len(path) > max_length:
+                max_length = len(path)
+        return max_length
     def begin(self):
         cases_tensors = {}
         for c in range(len(self.cases)):# iterate on every case to get the channels
             channels_1_all_agents_all_steps = {}
             channels_2_all_agents_all_steps = {}
             channels_3_all_agents_all_steps = {}
-            max_path = len(max(self.cases[c]['paths']))
+            # max_path = len(max(self.cases[c]['paths']))
+            max_path = self.get_max_length(self.cases[c]['paths'])
             for step in range(max_path):# iterate on every step to get the matrices              
                 channels_1_all_agents_all_steps[step] = self.get_channel_1(c,step)
                 channels_2_all_agents_all_steps[step] = self.get_channel_2(c,step)
                 channels_3_all_agents_all_steps[step] = self.get_channel_3(c,step)
-             
+        
             cases_tensors[c] = {'channel 1':channels_1_all_agents_all_steps,
                                 'channel 2':channels_2_all_agents_all_steps,
                                 'channel 3':channels_3_all_agents_all_steps}

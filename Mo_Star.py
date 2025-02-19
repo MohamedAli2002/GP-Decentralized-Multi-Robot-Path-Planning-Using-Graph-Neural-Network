@@ -60,13 +60,19 @@ class MoStar:
         keys_to_remove = [key for key, value in self.et.items() if value == agent]
         for key in keys_to_remove:
             del self.et[key]
-            
+    def get_max_length(self,paths):
+        max_length = 0
+        for path in paths:
+            if len(path) > max_length:
+                max_length = len(path)
+        return max_length      
     def check_conflicts(self,paths):
         if None in paths:
             return 0
         num_of_confilicts = 0
         list_of_confilicts = []
-        max_len = max(len(path) for path in paths)
+        max_len = self.get_max_length(paths)
+        # max_len = max(len(path) for path in paths)
         for step in range(max_len):
             step_nodes = {}
             for path in paths:
