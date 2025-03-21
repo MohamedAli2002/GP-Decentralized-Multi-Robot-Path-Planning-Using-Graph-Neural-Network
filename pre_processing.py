@@ -33,12 +33,13 @@ class Preprocessing:
                     if (i-self.r_fov+k) >= 0 and (i-self.r_fov+k) < len(grid_step) and (j-self.r_fov+l)>=0 and (j-self.r_fov+l) < len(grid_step): # check if node is in the grid
                         channel[k][l] = grid_step[i-self.r_fov+k][j-self.r_fov+l] 
                     else:# node is out of the grid so we set it to 1
-                        channel[k][l] = 1
+                        channel[k][l] = 0
             # print(channel)
             # print((i,j))
             np_channel = np.array(channel)
             padding_channel = np.pad(np_channel, pad_width=1, mode='constant', constant_values=0)
-            channels.append(padding_channel)
+            rotated_channel = np.rot90(padding_channel)
+            channels.append(rotated_channel)
         return channels
     def get_channel_2(self,case,s):
         channels = []
@@ -77,7 +78,8 @@ class Preprocessing:
                 channel[position_on_channel[0]][position_on_channel[1]] = 1
             # print(channel)
             # print((i,j))
-            channels.append(channel)
+            rotated_channel = np.rot90(channel)
+            channels.append(rotated_channel)
         return channels
     def get_channel_1(self,case,s):
         channels = []
@@ -99,10 +101,12 @@ class Preprocessing:
                     if (i-self.r_fov+k) >= 0 and (i-self.r_fov+k) < len(self.grid) and (j-self.r_fov+l)>=0 and (j-self.r_fov+l) < len(self.grid): # check if node is in the grid
                         channel[k][l] = self.grid[i-self.r_fov+k][j-self.r_fov+l]
                     else:# node is out of the grid so we set it to 1
-                        channel[k][l] = 1
+                        channel[k][l] = 0
             # print(channel)
             # print((i,j))
-            channels.append(np.pad(channel, pad_width=1, mode='constant', constant_values=0))
+            padding_channel = np.pad(channel, pad_width=1, mode='constant', constant_values=0)
+            rotated_channel = np.rot90(padding_channel)
+            channels.append(rotated_channel)
         return channels
     def get_max_length(self,paths):
         max_length = 0

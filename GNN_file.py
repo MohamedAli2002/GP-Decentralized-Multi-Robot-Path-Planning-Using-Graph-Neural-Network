@@ -12,6 +12,8 @@ class Communication_GNN():
         self.adj_mat = adj_mat # ->dict
         self.num_of_agents = num_of_agents
         if gnn_model is None:
+            seed = 42
+            torch.manual_seed(seed)
             self.gnn = GNN(input_dim=128, hidden_dim=128, output_dim=128, num_layers=2).to(device)
         else:
             self.gnn = gnn_model.to(device)

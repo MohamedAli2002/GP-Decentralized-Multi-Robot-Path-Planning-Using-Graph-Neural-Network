@@ -7,6 +7,8 @@ class Encode:
         self.tensors = tensors
         self.num_agents = num_agents
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        seed = 42
+        torch.manual_seed(seed)
         self.encoder = ObservationEncoder().to(self.device)
     def begin(self):
         encoded_channels = {}
@@ -40,6 +42,8 @@ class ObservationEncoder(nn.Module):
     def __init__(self, input_channels=3, feature_dim=128):
         super().__init__()
         # Block 1: 3x9x9 -> 32x4x4
+        seed = 42
+        torch.manual_seed(seed)
         self.encoder = nn.Sequential(
             nn.Conv2d(input_channels, 32, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(32),
@@ -59,6 +63,8 @@ class ObservationEncoder(nn.Module):
         self.fc = nn.Linear(128 * 2 * 2, feature_dim)
 
     def forward(self, x):
+        seed = 42
+        torch.manual_seed(seed)
         x = self.encoder(x)  # Output: (batch, 32, 4, 4)
         x = x.view(x.size(0), -1)  # Flatten to (batch, 128*2*2)
         x = self.fc(x)  # Output: (batch, 128)
