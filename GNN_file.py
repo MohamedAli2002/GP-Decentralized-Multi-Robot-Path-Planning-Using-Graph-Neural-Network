@@ -1,52 +1,90 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
-from torch_geometric.utils import dense_to_sparse
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-class Communication_GNN():
-    def __init__(self,encoded, adj_mat, num_of_agents, gnn_model=None):
-        self.encoded = encoded # ->dict
-        self.adj_mat = adj_mat # ->dict
+class Communication_GNN:
+    def __init__(self, encoded, adj_mat, num_of_agents, gnn_model=None):
+        self.encoded = encoded  # dict
+        self.adj_mat = adj_mat  # dict
         self.num_of_agents = num_of_agents
         if gnn_model is None:
             seed = 42
             torch.manual_seed(seed)
-            self.gnn = GNN(input_dim=128, hidden_dim=128, output_dim=128, num_layers=2).to(device)
+            self.gnn = PaperGNN(input_dim=128, output_dim=128, K=2).to(device)
         else:
             self.gnn = gnn_model.to(device)
 
     def begin(self):
         features = {}
-        for c in range(len(self.encoded.keys())): # for every case
+        for c in self.encoded.keys():  # Iterate directly over keys
             features_steps = {}
-            for s in range(len(self.encoded[c])): # for every step
+            for s in range(len(self.encoded[c])):
+                # Move tensors to device
                 encoded_step = torch.tensor(self.encoded[c][s], dtype=torch.float32).to(device)
                 adj = torch.tensor(self.adj_mat[c][s], dtype=torch.float32).to(device)
-                edge_index, _ = dense_to_sparse(adj)
-                gnn_features = self.gnn(encoded_step,edge_index)
+                # Forward pass
+                gnn_features = self.gnn(encoded_step, adj)
+                # gnn_features = self.gnn(encoded_step, St)
                 features_steps[s] = gnn_features
             features[c] = features_steps
         return features
-                
 
-class GNN(nn.Module):
-    def __init__(self, input_dim=128, hidden_dim=128, output_dim=128, num_layers = 2):
-        super(GNN, self).__init__()
+class PaperGraphConv(nn.Module):
+    def __init__(self, input_dim, output_dim, K=3):
+        super().__init__()
+        self.K = K
+        
+        self.A = nn.ParameterList([
+            nn.Parameter(torch.Tensor(input_dim, output_dim))
+            for _ in range(K)
+        ])
+        
+        self.bias = nn.Parameter(torch.Tensor(output_dim))
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        for a in self.A:
+            nn.init.xavier_uniform_(a)
+        nn.init.zeros_(self.bias)
+
+    def forward(self, X, St):
+        out = 0
+        X_k = X 
+        
+        for k in range(self.K):
+            # Add term for current shift power
+            out = out + torch.mm(X_k, self.A[k])
+            
+            if k < self.K - 1:  # No need to compute beyond K-1
+                X_k = torch.sparse.mm(St, X_k)
+        
+        return out + self.bias
+
+class PaperGNN(nn.Module):
+    def __init__(self, input_dim=128, hidden_dim=128, output_dim=128, 
+                 num_layers=2, K=3):
+        super().__init__()
         self.num_layers = num_layers
         self.convs = nn.ModuleList()
         
-        self.convs.append(GCNConv(input_dim, hidden_dim))
+        # First layer
+        self.convs.append(PaperGraphConv(input_dim, hidden_dim, K))
         
+        # Intermediate layers
         for _ in range(num_layers - 2):
-            self.convs.append(GCNConv(hidden_dim, hidden_dim))
-            
-        self.convs.append(GCNConv(hidden_dim, output_dim))
-    def forward(self, x, edge_index):
+            self.convs.append(PaperGraphConv(hidden_dim, hidden_dim, K))
+        
+        # Final layer
+        self.convs.append(PaperGraphConv(hidden_dim, output_dim, K))
+
+    def forward(self, x, St):
         for i, conv in enumerate(self.convs):
-            x = conv(x, edge_index)
-            if i != self.num_layers - 1:
+            x = conv(x, St)
+            if i != self.num_layers - 1:  # ReLU for all but last layer
                 x = F.relu(x)
         return x

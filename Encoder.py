@@ -13,16 +13,15 @@ class Encode:
     def begin(self):
         encoded_channels = {}
         for itr in range(len(self.tensors.keys())):
-            first_channels = self.tensors[itr]['channel 1']
+            # first_channels = self.tensors[itr]['channel 1']
             second_channels = self.tensors[itr]['channel 2']
             third_channels = self.tensors[itr]['channel 3']
             encoded_channels_steps = {}
             
-            for step in range(len(first_channels)):
+            for step in range(len(second_channels)):
                 batch_channels = []
                 for i in range(self.num_agents):
                     agent_channels = np.stack([
-                        first_channels[step][i],
                         second_channels[step][i],
                         third_channels[step][i]
                     ])
@@ -39,9 +38,9 @@ class Encode:
         
         return encoded_channels
 class ObservationEncoder(nn.Module):
-    def __init__(self, input_channels=3, feature_dim=128):
+    def __init__(self, input_channels=2, feature_dim=128):  # Changed input_channels to 2
         super().__init__()
-        # Block 1: 3x9x9 -> 32x4x4
+        # Block 1: 2x9x9 -> 32x4x4
         seed = 42
         torch.manual_seed(seed)
         self.encoder = nn.Sequential(

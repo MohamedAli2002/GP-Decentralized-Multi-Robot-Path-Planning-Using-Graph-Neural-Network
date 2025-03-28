@@ -7,6 +7,7 @@ class Generate_Model:
     def __init__(self,model, dataset, num_epochs = 150):
         self.model = model
         self.num_epochs = num_epochs
+        seed = 42
         torch.manual_seed(seed)
         self.criterion = nn.CrossEntropyLoss()
         torch.manual_seed(seed)
@@ -100,5 +101,5 @@ class Generate_Model:
         print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy * 100:.2f}%")
         return test_loss, test_accuracy
     def save_model(self):
-        torch.save(self.model.state_dict(), "trained_model_3.pth")
+        torch.save(self.model.state_dict(), "trained_model_6.pth")
         print("Model saved successfully!")
