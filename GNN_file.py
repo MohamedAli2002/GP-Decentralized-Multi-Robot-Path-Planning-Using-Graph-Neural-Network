@@ -1,3 +1,4 @@
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -37,6 +38,8 @@ class Communication_GNN:
 class PaperGraphConv(nn.Module):
     def __init__(self, input_dim, output_dim, K=3):
         super().__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
         self.K = K
         
         self.A = nn.ParameterList([
@@ -45,17 +48,38 @@ class PaperGraphConv(nn.Module):
         ])
         
         self.bias = nn.Parameter(torch.Tensor(output_dim))
+        # seed = 42
+        # torch.manual_seed(seed)
+        self.A = nn.parameter.Parameter(torch.Tensor(K,input_dim,output_dim))
+        self.bias = nn.parameter.Parameter(torch.Tensor(output_dim))
+        # self.A = nn.ParameterList([
+        #     nn.Parameter(torch.Tensor(input_dim, output_dim))
+        #     for _ in range(K)
+        # ])
+
+        # self.bias = nn.Parameter(torch.Tensor(output_dim))
         self.reset_parameters()
 
     def reset_parameters(self):
         for a in self.A:
             nn.init.xavier_uniform_(a)
         nn.init.zeros_(self.bias)
+        # seed = 42
+        # torch.manual_seed(seed)
+        stdv = 1. / math.sqrt(self.input_dim * self.K)
+        self.A.data.uniform_(-stdv,stdv)
+        if self.bias is not None:
+            self.bias.data.uniform_(-stdv, stdv)
+        # for a in self.A:
+        #     nn.init.xavier_uniform_(a)
+        # nn.init.zeros_(self.bias)
 
     def forward(self, X, St):
         out = 0
         X_k = X 
         
+        X_k = X
+
         for k in range(self.K):
             # Add term for current shift power
             out = out + torch.mm(X_k, self.A[k])
@@ -63,22 +87,29 @@ class PaperGraphConv(nn.Module):
             if k < self.K - 1:  # No need to compute beyond K-1
                 X_k = torch.sparse.mm(St, X_k)
         
+                X_k = St @ X_k
+                # X_k = torch.sparse.mm(St, X_k)
+
         return out + self.bias
 
 class PaperGNN(nn.Module):
     def __init__(self, input_dim=128, hidden_dim=128, output_dim=128, 
+    def __init__(self, input_dim=128, hidden_dim=128, output_dim=128,
                  num_layers=2, K=3):
         super().__init__()
         self.num_layers = num_layers
         self.convs = nn.ModuleList()
         
+
         # First layer
         self.convs.append(PaperGraphConv(input_dim, hidden_dim, K))
         
+
         # Intermediate layers
         for _ in range(num_layers - 2):
             self.convs.append(PaperGraphConv(hidden_dim, hidden_dim, K))
         
+
         # Final layer
         self.convs.append(PaperGraphConv(hidden_dim, output_dim, K))
 
