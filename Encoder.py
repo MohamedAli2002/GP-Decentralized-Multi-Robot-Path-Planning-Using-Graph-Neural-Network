@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import numpy as np
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 class Encode:
     def __init__(self,tensors,num_agents):
@@ -42,43 +41,30 @@ class ObservationEncoder(nn.Module):
     def __init__(self, input_channels=2, feature_dim=128):  # Changed input_channels to 2
         super().__init__()
         # Block 1: 2x9x9 -> 32x4x4
-        seed = 42
-        torch.manual_seed(seed)
         # seed = 42
         # torch.manual_seed(seed)
         self.encoder = nn.Sequential(
-            nn.Conv2d(input_channels, 32, kernel_size=3, stride=1, padding=1),
             nn.Conv2d(input_channels, 32, kernel_size=3, stride=1, padding=1,bias = True),
             nn.BatchNorm2d(32),
-            nn.ReLU(),
             nn.ReLU(inplace = True),
             nn.MaxPool2d(kernel_size=2, stride=2), # Reduces spatial dim to 4x4
         # Block 2: 32x4x4 -> 64x2x2
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1,bias = True),
             nn.BatchNorm2d(64),
-            nn.ReLU(),
             nn.ReLU(inplace = True),
             nn.MaxPool2d(kernel_size=2, stride=2),  # Reduces spatial dim to 2x2
         # Block 3: 64x2x2 -> 128x2x2
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
             nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1,bias = True),
             nn.BatchNorm2d(128),
-            nn.ReLU()
             nn.ReLU(inplace = True)
         )
         # Fully connected layer to produce 128-D feature vector
-        self.fc = nn.Linear(128 * 2 * 2, feature_dim)
-
         self.fc = nn.Linear(128 * 2 * 2, feature_dim,bias=True)
         # self.relu = nn.ReLU(inplace = True)
     def forward(self, x):
-        seed = 42
-        torch.manual_seed(seed)
         # seed = 42
         # torch.manual_seed(seed)
         x = self.encoder(x)  # Output: (batch, 32, 4, 4)
-        x = x.view(x.size(0), -1)  # Flatten to (batch, 128*2*2)
         x = x.view(x.size(0), -1) # Flatten to (batch, 128*2*2)
         x = self.fc(x)  # Output: (batch, 128)
         # x = self.relu(x)

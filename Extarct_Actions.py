@@ -25,19 +25,14 @@ class Action_Extractor:
                 movements_robots = []
                 for path in new_paths:
                     action = -1
-                    if   path[s+1] == (path[s][0]-1,path[s][1]): # going left
                     if   path[s+1] == [path[s][0]-1,path[s][1]]: # going left
                         action = 1
-                    elif path[s+1] == (path[s][0],path[s][1]+1): # going up
                     elif path[s+1] == [path[s][0],path[s][1]+1]: # going up
                         action = 2
-                    elif path[s+1] == (path[s][0]+1,path[s][1]): # going right
                     elif path[s+1] == [path[s][0]+1,path[s][1]]: # going right
                         action = 3
-                    elif path[s+1] == (path[s][0],path[s][1]-1): # going down
                     elif path[s+1] == [path[s][0],path[s][1]-1]: # going down
                         action = 4
-                    elif path[s+1] == (path[s][0],path[s][1]): # staying in the same position
                     elif path[s+1] == [path[s][0],path[s][1]]: # staying in the same position
                         action = 0
                     movements_robots.append(action)
