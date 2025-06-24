@@ -20,21 +20,19 @@ class adj_mat:
             for s in range(max_len):
                 matrix = np.zeros((len(num_of_agents),len(num_of_agents)))
                 for i in range(len(num_of_agents)-1):
-                    for j in range(i+1,len(num_of_agents)):      
+                    for j in range(i+1,len(num_of_agents)):
                         if s >= len(paths[i]):
                             node_i = paths[i][-1]
                         else:
-                            node_i = paths[i][s]   
+                            node_i = paths[i][s]
                         if s >= len(paths[j]):
                             node_j = paths[j][-1]
                         else:
                             node_j = paths[j][s]
                         if abs(node_i[0]-node_j[0]) <= self.rfov and abs(node_i[1]-node_j[1]) <= self.rfov:
+
                             matrix[i][j] = 1
                             matrix[j][i] = 1
                 matrices_steps[s] = matrix
             matrices[itr] = matrices_steps
         return matrices
-                
-                
-                    

@@ -37,6 +37,6 @@ class Action_Extractor:
                         action = 0
                     movements_robots.append(action)
                 movements_step[s] = movements_robots
-            movements_step[s+1] = [0 for _ in range(self.num_of_robots)]
+            movements_step[max_len-1] = [0 for _ in range(self.num_of_robots)]
             movements[itr] = movements_step
         return movements

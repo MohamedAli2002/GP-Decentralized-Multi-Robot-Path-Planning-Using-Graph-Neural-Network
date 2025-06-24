@@ -54,7 +54,8 @@ class DatasetGenerator:
                             # case["goal_positions"].append(goal)
                             break
                 # Generate paths
-                print("case ",i)
+                if i % 1000 == 0:
+                    print("case ",i)
                 planner = MoStar(grid, start_points, goal_points)
                 # planner = MoStar(grid, case["start_positions"], case["goal_positions"])
                 paths = planner.plan()
@@ -64,7 +65,8 @@ class DatasetGenerator:
             case["goal_positions"] = goal_points
             case["paths"]=paths
             cases.append(case)
-            print("case added")
+            if i % 1000 == 0:
+                print("case added")
         # print(counter)
         return cases
 
