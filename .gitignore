@@ -1,1 +1,5 @@
 a.txt
+GNN_Features.txt
+encoded_tensors.txt
+data_tensors.txt
+Adj_Matrices.txt

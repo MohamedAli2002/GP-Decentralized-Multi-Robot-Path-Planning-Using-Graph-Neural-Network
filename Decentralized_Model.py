@@ -151,22 +151,14 @@ class decentralizedModel(torch.nn.Module):
             val_loss, val_acc = self.evaluate_model(self.val_loader)
             self.scheduler.step()
             current_lr = self.optimizer.param_groups[0]['lr']
-            if epoch % 4 ==0:
-              test_success = self.test_scenario(num_of_cases=500,random_seed = epoch+100)
-              if test_success > success_rate:
-                self.save_checkpoint(epoch)
-                success_rate = test_success
             print(f"Epoch [{epoch}/{self.num_epochs}] "
                   f"Train Loss: {avg_train_loss:.4f} "
                   f"Val Loss: {val_loss:.4f} "
                   f"Val Acc: {val_acc * 100:.2f}% "
-                  f"LR: {current_lr:.6f} "
-                  f"Success Rate: {test_success}")
+                  f"LR: {current_lr:.6f} ")
             # Save checkpoint at each epoch
-
-
+            self.save_checkpoint(epoch)
         print("Training complete.")
-        print(f"success rate = {success_rate}")
 
     def test_model(self):
         test_loss, test_acc = self.evaluate_model(self.test_loader)
